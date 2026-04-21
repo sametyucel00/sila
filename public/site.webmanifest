@@ -1,0 +1,15 @@
+{
+  "name": "Sıla",
+  "short_name": "Sıla",
+  "description": "Sıla için hazırlanmış özel ilişki uygulaması.",
+  "theme_color": "#fff5f6",
+  "background_color": "#fff5f6",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "1024x1024",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Sıla</string>
+    <string name="title_activity_main">Sıla</string>
+    <string name="package_name">com.sila.app</string>
+    <string name="custom_url_scheme">com.sila.app</string>
+</resources>
