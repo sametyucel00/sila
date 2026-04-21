@@ -159,6 +159,7 @@ function App() {
   const [activeTab, setActiveTab] = useState('home')
   const [usedCoupons, setUsedCoupons] = useState(() => loadDailyCoupons())
   const [dreams, setDreams] = useState(() => loadDreams())
+  const [selectedTimelineImage, setSelectedTimelineImage] = useState(null)
   const togetherDays = useMemo(() => daysSince(anniversaryDate), [])
   const birthdayCountdown = useMemo(() => daysUntilBirthday(11, 11), [])
   const noteOfDay = useMemo(() => pickDailyItem(dailyNotes), [])
@@ -171,6 +172,21 @@ function App() {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' })
   }, [activeTab])
+
+  useEffect(() => {
+    if (!selectedTimelineImage) {
+      return undefined
+    }
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setSelectedTimelineImage(null)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [selectedTimelineImage])
 
   useEffect(() => {
     persistDailyCoupons(usedCoupons)
@@ -195,25 +211,29 @@ function App() {
   return (
     <div className="app-shell">
       <main className="app-container">
-        {activeTab === 'home' && (
-          <HomePage
-            birthdayCountdown={birthdayCountdown}
-            noteOfDay={noteOfDay}
-            reasonOfDay={reasonOfDay}
-            togetherDays={togetherDays}
-          />
-        )}
-        {activeTab === 'timeline' && <TimelinePage />}
-        {activeTab === 'moments' && <MomentsPage />}
-        {activeTab === 'profile' && <ProfilePage />}
-        {activeTab === 'lovelab' && (
-          <LoveLabPage
-            dreams={dreams}
-            toggleDream={toggleDream}
-            handleCouponUse={handleCouponUse}
-            usedCoupons={usedCoupons}
-          />
-        )}
+        <div className="page-stage" key={activeTab}>
+          {activeTab === 'home' && (
+            <HomePage
+              birthdayCountdown={birthdayCountdown}
+              noteOfDay={noteOfDay}
+              reasonOfDay={reasonOfDay}
+              togetherDays={togetherDays}
+            />
+          )}
+          {activeTab === 'timeline' && <TimelinePage />}
+          {activeTab === 'moments' && (
+            <MomentsPage onOpenImage={setSelectedTimelineImage} />
+          )}
+          {activeTab === 'profile' && <ProfilePage />}
+          {activeTab === 'lovelab' && (
+            <LoveLabPage
+              dreams={dreams}
+              toggleDream={toggleDream}
+              handleCouponUse={handleCouponUse}
+              usedCoupons={usedCoupons}
+            />
+          )}
+        </div>
 
         <nav className="bottom-nav">
           {tabs.map((tab) => {
@@ -233,6 +253,26 @@ function App() {
             )
           })}
         </nav>
+
+        {selectedTimelineImage && (
+          <div
+            className="image-modal"
+            onClick={() => setSelectedTimelineImage(null)}
+            role="button"
+            tabIndex={0}
+          >
+            <div className="image-modal-content" onClick={(event) => event.stopPropagation()}>
+              <button
+                className="image-modal-close"
+                onClick={() => setSelectedTimelineImage(null)}
+                type="button"
+              >
+                ×
+              </button>
+              <img src={selectedTimelineImage.src} alt={selectedTimelineImage.alt} />
+            </div>
+          </div>
+        )}
       </main>
     </div>
   )
@@ -328,7 +368,7 @@ function TimelinePage() {
   )
 }
 
-function MomentsPage() {
+function MomentsPage({ onOpenImage }) {
   return (
     <div className="page space-y-10 pb-10">
       <div className="page-head">
@@ -339,9 +379,13 @@ function MomentsPage() {
       <div className="timeline-list">
         {timelineItems.map((item) => (
           <article key={item.title} className="timeline-card glass-card">
-            <div className="timeline-image-wrap">
+            <button
+              className="timeline-image-wrap timeline-image-button"
+              onClick={() => onOpenImage({ alt: item.title, src: item.image })}
+              type="button"
+            >
               <img src={item.image} alt={item.title} />
-            </div>
+            </button>
             <div className="timeline-content">
               <span className="timeline-category">{item.category}</span>
               <h3>{item.title}</h3>

@@ -28,6 +28,7 @@
 
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html,
@@ -83,6 +84,10 @@ img {
   margin: 0 auto;
 }
 
+.page-stage {
+  animation: pageFade .2s ease both;
+}
+
 .page {
   padding-top: 16px;
 }
@@ -121,7 +126,7 @@ img {
   background: var(--glass);
   box-shadow: var(--shadow);
   backdrop-filter: blur(16px);
-  animation: cardIn .5s ease both;
+  animation: cardIn .28s ease both;
   transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease, opacity .18s ease;
 }
 
@@ -406,8 +411,8 @@ img {
 .timeline-card:active,
 .coupon-card:not(.used):active,
 .check-row:active,
-.nav-item:active,
-.mood-button:active {
+.mood-button:active,
+.timeline-image-button:active {
   transform: scale(.98);
 }
 
@@ -442,13 +447,22 @@ img {
 }
 
 .timeline-image-wrap {
-  height: 256px;
+  height: 320px;
+  background: linear-gradient(180deg, #fff7f8, #fff0f3);
 }
 
 .timeline-image-wrap img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  padding: 10px;
+}
+
+.timeline-image-button {
+  width: 100%;
+  display: block;
+  padding: 0;
+  cursor: zoom-in;
 }
 
 .timeline-content {
@@ -509,14 +523,17 @@ img {
 
 .favorites-list {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
 .favorite-row {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   padding: 16px;
+  text-align: center;
 }
 
 .favorite-icon {
@@ -774,6 +791,54 @@ img {
   color: var(--rose-500);
 }
 
+.image-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(17, 24, 39, 0.72);
+  backdrop-filter: blur(8px);
+  animation: fadeIn .16s ease both;
+}
+
+.image-modal-content {
+  position: relative;
+  width: min(100%, 460px);
+  max-height: 90vh;
+  border-radius: 24px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  animation: modalUp .18s ease both;
+}
+
+.image-modal-content img {
+  width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+  background: #fff8fa;
+}
+
+.image-modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(17, 24, 39, 0.7);
+  color: #fff;
+  font-size: 26px;
+  line-height: 1;
+}
+
 .nav-icon {
   width: 20px;
   height: 20px;
@@ -797,11 +862,42 @@ img {
 @keyframes cardIn {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes pageFade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -853,9 +949,7 @@ img {
   }
 
   .fact-grid,
-  .detail-grid,
-  .future-grid,
-  .coupon-grid {
+  .future-grid {
     grid-template-columns: 1fr;
   }
 
