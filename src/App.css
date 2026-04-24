@@ -44,6 +44,11 @@ body {
   color: var(--gray-800);
 }
 
+body.modal-open {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 button,
 input,
 textarea,
@@ -486,7 +491,7 @@ img {
 
 .add-form {
   display: grid;
-  gap: 14px;
+  gap: 12px;
 }
 
 .editable-card {
@@ -537,7 +542,7 @@ img {
 
 .form-field textarea {
   resize: vertical;
-  min-height: 96px;
+  min-height: 72px;
 }
 
 .card-delete-button,
@@ -629,7 +634,7 @@ img {
 .form-actions {
   display: flex;
   align-items: end;
-  gap: 12px;
+  gap: 10px;
 }
 
 .icon-field {
@@ -639,7 +644,7 @@ img {
 .add-submit {
   min-width: 112px;
   border-radius: 18px;
-  padding: 13px 16px;
+  padding: 12px 15px;
   background: linear-gradient(135deg, #fb7185, #f43f5e);
   color: #fff;
   font-weight: 700;
@@ -657,25 +662,33 @@ img {
 .form-modal-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 45;
+  z-index: 60;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 18px;
-  background: rgba(17, 24, 39, 0.34);
-  backdrop-filter: blur(8px);
+  padding: max(14px, env(safe-area-inset-top)) 14px max(14px, env(safe-area-inset-bottom));
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(12px);
+  overflow: hidden;
   animation: fadeIn .16s ease both;
 }
 
 .form-modal {
-  width: min(100%, 448px);
-  max-height: min(88vh, 760px);
-  border-radius: 28px;
-  padding: 18px;
-  background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 24px 50px rgba(17, 24, 39, 0.18);
+  width: min(100%, 400px);
+  max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  min-height: 0;
+  border-radius: 24px;
+  padding: 14px;
+  background: #fffafb;
+  box-shadow: 0 24px 50px rgba(17, 24, 39, 0.22);
   animation: modalUp .18s ease both;
-  overflow-y: auto;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  transform: translateZ(0);
 }
 
 .form-modal-head {
@@ -683,7 +696,9 @@ img {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(244, 63, 94, 0.08);
 }
 
 .form-modal-head h3 {
@@ -702,6 +717,44 @@ img {
   color: var(--rose-500);
   font-size: 24px;
   line-height: 1;
+}
+
+.form-modal-body {
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding-right: 2px;
+}
+
+.form-modal .add-form {
+  gap: 10px;
+}
+
+.form-modal .form-grid {
+  gap: 10px;
+}
+
+.form-modal .form-field {
+  gap: 6px;
+}
+
+.form-modal .form-field input,
+.form-modal .form-field textarea,
+.form-modal .form-field select {
+  padding: 11px 12px;
+}
+
+.form-modal .form-field textarea {
+  min-height: 64px;
+  max-height: 120px;
+}
+
+.form-modal .form-actions {
+  position: sticky;
+  bottom: 0;
+  padding-top: 4px;
+  background: linear-gradient(180deg, rgba(255, 250, 251, 0), #fffafb 28px);
 }
 
 .timeline-card {
@@ -1240,6 +1293,31 @@ img {
   .form-actions {
     grid-template-columns: 1fr;
     display: grid;
+  }
+
+  .form-modal-backdrop {
+    padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
+  }
+
+  .form-modal {
+    width: 100%;
+    max-height: calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    border-radius: 22px;
+    padding: 14px;
+  }
+
+  .form-modal .form-grid.compact {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .form-modal .form-actions {
+    display: flex;
+    grid-template-columns: none;
+    align-items: end;
+  }
+
+  .form-modal .add-submit {
+    min-width: 96px;
   }
 
   .fact-grid,

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import './App.css'
 
 const anniversaryDate = new Date('2023-10-06T00:00:00')
@@ -1556,7 +1557,23 @@ function AddSpecialDayForm({ initialValues, onSubmit, submitLabel = 'Ekle' }) {
 }
 
 function FormModal({ children, onClose, title }) {
-  return (
+  useEffect(() => {
+    document.body.classList.add('modal-open')
+    return () => document.body.classList.remove('modal-open')
+  }, [])
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        onClose()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [onClose])
+
+  const modal = (
     <div className="form-modal-backdrop" onClick={onClose} role="button" tabIndex={0}>
       <div className="form-modal" onClick={(event) => event.stopPropagation()}>
         <div className="form-modal-head">
@@ -1565,10 +1582,12 @@ function FormModal({ children, onClose, title }) {
             ×
           </button>
         </div>
-        {children}
+        <div className="form-modal-body">{children}</div>
       </div>
     </div>
   )
+
+  return createPortal(modal, document.body)
 }
 
 function createSeedList(sectionKey, items) {
