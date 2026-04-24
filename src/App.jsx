@@ -1,10 +1,13 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 
 const anniversaryDate = new Date('2023-10-06T00:00:00')
 const heroImage = '/sila-portrait.jpg'
 const COUPON_STORAGE_KEY = 'sila-daily-coupons'
-const DREAMS_STORAGE_KEY = 'sila-dreams'
+const CONTENT_STORAGE_KEY = 'sila-content-v2'
+const LEGACY_DREAMS_STORAGE_KEY = 'sila-dreams'
+const LEGACY_CUSTOM_LISTS_STORAGE_KEY = 'sila-custom-lists'
+const LEGACY_CUSTOM_TIMELINE_STORAGE_KEY = 'sila-custom-timeline'
 
 const tabs = [
   { id: 'home', label: 'Bugün', icon: TodayIcon },
@@ -14,44 +17,44 @@ const tabs = [
   { id: 'lovelab', label: 'Mod', icon: MoodIcon },
 ]
 
-const cityItems = [
+const cityItemsSeed = createSeedList('cities', [
   { name: 'Alanya', icon: '🌴', meta: 'İlk buluşma' },
   { name: 'Bolu', icon: '🍃', meta: 'Gezi' },
   { name: 'Ordu', icon: '🌊', meta: 'Anılar' },
-]
+])
 
-const venueItems = [
+const venueItemsSeed = createSeedList('venues', [
   { name: 'Mcdonalds', icon: '🍔', meta: 'Yemek' },
   { name: 'Alanya Çay Bahçesi', icon: '🍵', meta: 'Çay' },
   { name: 'Shakespeare', icon: '🍽️', meta: 'Mekan' },
   { name: 'Starbucks', icon: '☕', meta: 'Kahve' },
-]
+])
 
-const placeItems = [
+const placeItemsSeed = createSeedList('places', [
   { name: 'Kızıl Kule', icon: '🧱', meta: 'Gezi' },
   { name: 'Alanya Kalesi', icon: '🏰', meta: 'Manzara' },
   { name: 'Yason Burnu', icon: '🌅', meta: 'Sahil' },
   { name: 'Boztepe', icon: '🌄', meta: 'Yukarıdan' },
-]
+])
 
-const movieItems = [
+const movieItemsSeed = createSeedList('movies', [
   { name: 'Star Wars', icon: '⭐', meta: 'En önemlisi' },
   { name: 'Arabalar 1-3', icon: '🚗', meta: 'Film' },
   { name: 'Avrupa Yakası', icon: '📺', meta: 'Dizi' },
   { name: 'Modern Family', icon: '🎬', meta: 'Dizi' },
   { name: 'Stranger Things', icon: '🛸', meta: 'Dizi' },
-]
+])
 
-const gameItems = [
+const gameItemsSeed = createSeedList('games', [
   { name: 'It Takes Two', icon: '🎮', meta: 'Co-op' },
   { name: 'A Way Out', icon: '🚔', meta: 'Kaçış' },
   { name: 'Sea of Thieves', icon: '🎮', meta: 'Macera' },
   { name: 'V Rising', icon: '🧛', meta: 'Vampir' },
   { name: 'Portal 2', icon: '🎮', meta: 'Bulmaca' },
   { name: 'Cuphead', icon: '🎮', meta: 'Zor' },
-]
+])
 
-const timelineItems = [
+const timelineItemsSeed = createSeedList('moments', [
   {
     title: 'Sarılınca Dünya Yavaşlıyor',
     description:
@@ -80,16 +83,75 @@ const timelineItems = [
     category: 'Sakin An',
     image: '/timeline-1.jpg',
   },
-]
+])
 
-const importantDetails = [
+const importantDetailsSeed = createSeedList('importantDetails', [
   { label: 'Yüzük Ölçüsü', value: '14 beden / 54-60 mm', icon: '💍' },
   { label: 'Kan Grubu', value: 'A Rh+', icon: '🩸' },
   { label: 'En Sevdiği Çiçek', value: 'Lale', icon: '🌷' },
   { label: 'Burç', value: 'Yay', icon: '♐' },
   { label: 'Doğum Günü', value: '11 Aralık 2001', icon: '🎂' },
   { label: 'Favori Takı', value: 'Kolye', icon: '✨' },
-]
+])
+
+const favoritesSeed = createSeedList('favorites', [
+  { label: 'En Sevdiği Yemek', value: 'Mantı ve hamburger', icon: '🍔' },
+  { label: 'Tatlı', value: 'Dondurma', icon: '🍨' },
+  { label: 'Çikolata', value: 'Her türlü olur', icon: '🍫' },
+  { label: 'Müzik', value: 'Türkçe pop ve yabancı pop', icon: '🎶' },
+  { label: 'Favori Kahve', value: 'Filtre kahve', icon: '☕' },
+  { label: 'Favori İçecek', value: 'Su', icon: '💧' },
+  { label: 'Favori Alkol', value: 'Tekila', icon: '🥂' },
+  { label: 'Favori Aktivite', value: 'Onu mutlu edecek her şey', icon: '🤍' },
+])
+
+const sensitiveItemsSeed = createSeedList('sensitiveItems', [
+  { label: 'Hassas Nokta', value: 'Kulağının arkası', icon: '🌸' },
+  { label: 'Korkusu', value: 'Böcekler, karanlık, izlenmek', icon: '🕷️' },
+])
+
+const wishItemsSeed = createSeedList('wishItems', [
+  { label: 'En Büyük İsteği', value: 'Şu anda evlenmek', icon: '💒' },
+])
+
+const futureItemsSeed = createSeedList('futureItems', [
+  { label: 'Kızımızın Adı', value: 'Elizabeth Ceylan', icon: '👶' },
+  { label: 'Kedi Adları', value: 'Mırmır, Pamuk, Aşk, Kuzu', icon: '🐱' },
+  { label: 'Köpek Adları', value: 'Deccal, Düşman, Nankör', icon: '🐶' },
+])
+
+const couponsSeed = createSeedList('coupons', [
+  { title: 'Gece Dondurması', icon: '🍦', color: 'blue' },
+  { title: 'Sınırsız Masaj', icon: '💆', color: 'rose' },
+  { title: 'Film Seçme Hakkı', icon: '🎬', color: 'amber' },
+  { title: 'Sınırsız İltifat', icon: '✨', color: 'teal' },
+])
+
+const dreamItemsSeed = createSeedList('dreams', [
+  { title: 'Tatile gitmek', completed: false },
+  { title: 'Evlenmek', completed: false },
+  { title: 'Ev ve araba almak', completed: false },
+  { title: 'Zengin olmak', completed: false },
+  { title: 'Daha iyi bir Türkiye görmek', completed: false },
+])
+
+const songItemsSeed = createSeedList('songs', [
+  {
+    label: 'Bizim Şarkımız',
+    value: 'American Pie',
+    description: 'Bir de ekstra duygulandıran şarkı: Arkadaşım Eşek',
+    icon: '♫',
+  },
+])
+
+const specialDaysSeed = createSeedList('specialDays', [
+  {
+    date: '2001-12-11',
+    icon: '🎂',
+    label: 'Doğum Günü',
+    recurring: 'yearly',
+  },
+])
 
 const dailyNotes = [
   'Bugün yine iyi ki varsın dedirten günlerden biri.',
@@ -107,67 +169,38 @@ const loveReasons = [
   'Çünkü bazen hiçbir şey yapmadan bile mutlu olmamı sağlıyorsun.',
 ]
 
-const favorites = [
-  { label: 'En Sevdiği Yemek', value: 'Mantı ve hamburger', icon: '🍔' },
-  { label: 'Tatlı', value: 'Dondurma', icon: '🍨' },
-  { label: 'Çikolata', value: 'Her türlü olur', icon: '🍫' },
-  { label: 'Müzik', value: 'Türkçe pop ve yabancı pop', icon: '🎶' },
-  { label: 'Favori Kahve', value: 'Filtre kahve', icon: '☕' },
-  { label: 'Favori İçecek', value: 'Su', icon: '💧' },
-  { label: 'Favori Alkol', value: 'Tekila', icon: '🥂' },
-  { label: 'Favori Aktivite', value: 'Onu mutlu edecek her şey', icon: '🤍' },
-]
-
-const sensitiveItems = [
-  { label: 'Hassas Nokta', value: 'Kulağının arkası', icon: '🌸' },
-  { label: 'Korkusu', value: 'Böcekler, karanlık, izlenmek', icon: '🕷️' },
-]
-
-const biggestWish = {
-  label: 'En Büyük İsteği',
-  value: 'Şu anda evlenmek',
-  icon: '💒',
-}
-
-const futureItems = [
-  { label: 'Kızımızın Adı', value: 'Elizabeth Ceylan', icon: '👶' },
-  { label: 'Kedi Adları', value: 'Mırmır, Pamuk, Aşk, Kuzu', icon: '🐱' },
-  { label: 'Köpek Adları', value: 'Deccal, Düşman, Nankör', icon: '🐶' },
-]
-
-const coupons = [
-  { id: 1, title: 'Gece Dondurması', icon: '🍦', color: 'blue' },
-  { id: 2, title: 'Sınırsız Masaj', icon: '💆', color: 'rose' },
-  { id: 3, title: 'Film Seçme Hakkı', icon: '🎬', color: 'amber' },
-  { id: 4, title: 'Sınırsız İltifat', icon: '✨', color: 'teal' },
-]
-
-const dreamListSeed = [
-  { id: 1, title: 'Tatile gitmek', completed: false },
-  { id: 2, title: 'Evlenmek', completed: false },
-  { id: 3, title: 'Ev ve araba almak', completed: false },
-  { id: 4, title: 'Zengin olmak', completed: false },
-  { id: 5, title: 'Daha iyi bir Türkiye görmek', completed: false },
-]
-
-function daysSince(date) {
-  const oneDay = 1000 * 60 * 60 * 24
-  return Math.max(1, Math.floor((Date.now() - date.getTime()) / oneDay))
-}
-
 function App() {
   const [activeTab, setActiveTab] = useState('home')
+  const [todayKey, setTodayKey] = useState(() => getTodayKey())
   const [usedCoupons, setUsedCoupons] = useState(() => loadDailyCoupons())
-  const [dreams, setDreams] = useState(() => loadDreams())
   const [selectedTimelineImage, setSelectedTimelineImage] = useState(null)
-  const togetherDays = useMemo(() => daysSince(anniversaryDate), [])
-  const birthdayCountdown = useMemo(() => daysUntilBirthday(11, 11), [])
-  const noteOfDay = useMemo(() => pickDailyItem(dailyNotes), [])
-  const reasonOfDay = useMemo(() => pickDailyItem(loveReasons, 7), [])
+  const [content, setContent] = useState(() => loadEditableContent())
+
+  const togetherDays = daysSince(anniversaryDate)
+  const noteOfDay = pickDailyItem(dailyNotes)
+  const reasonOfDay = pickDailyItem(loveReasons, 7)
 
   useEffect(() => {
     document.title = 'Sıla'
   }, [])
+
+  useEffect(() => {
+    const now = new Date()
+    const nextMidnight = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() + 1,
+      0,
+      0,
+      1,
+    )
+    const timeoutId = window.setTimeout(() => {
+      setTodayKey(getTodayKey())
+      setUsedCoupons(loadDailyCoupons())
+    }, nextMidnight.getTime() - now.getTime())
+
+    return () => window.clearTimeout(timeoutId)
+  }, [todayKey])
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' })
@@ -193,15 +226,40 @@ function App() {
   }, [usedCoupons])
 
   useEffect(() => {
-    persistDreams(dreams)
-  }, [dreams])
+    persistEditableContent(content)
+  }, [content])
+
+  const handleAddSectionItem = (sectionKey, item) => {
+    setContent((current) => ({
+      ...current,
+      [sectionKey]: [...current[sectionKey], { id: createCustomId(sectionKey), ...item }],
+    }))
+  }
+
+  const handleDeleteSectionItem = (sectionKey, itemId) => {
+    setContent((current) => ({
+      ...current,
+      [sectionKey]: current[sectionKey].filter((item) => item.id !== itemId),
+    }))
+    setUsedCoupons((current) => current.filter((couponId) => couponId !== itemId))
+  }
+
+  const handleUpdateSectionItem = (sectionKey, itemId, updates) => {
+    setContent((current) => ({
+      ...current,
+      [sectionKey]: current[sectionKey].map((item) =>
+        item.id === itemId ? { ...item, ...updates } : item,
+      ),
+    }))
+  }
 
   const toggleDream = (id) => {
-    setDreams((current) =>
-      current.map((item) =>
+    setContent((current) => ({
+      ...current,
+      dreams: current.dreams.map((item) =>
         item.id === id ? { ...item, completed: !item.completed } : item,
       ),
-    )
+    }))
   }
 
   const handleCouponUse = (id) => {
@@ -214,22 +272,58 @@ function App() {
         <div className="page-stage" key={activeTab}>
           {activeTab === 'home' && (
             <HomePage
-              birthdayCountdown={birthdayCountdown}
               noteOfDay={noteOfDay}
+              onAddSectionItem={handleAddSectionItem}
+              onDeleteSectionItem={handleDeleteSectionItem}
+              onUpdateSectionItem={handleUpdateSectionItem}
               reasonOfDay={reasonOfDay}
+              specialDays={content.specialDays}
               togetherDays={togetherDays}
             />
           )}
-          {activeTab === 'timeline' && <TimelinePage />}
-          {activeTab === 'moments' && (
-            <MomentsPage onOpenImage={setSelectedTimelineImage} />
+          {activeTab === 'timeline' && (
+            <TimelinePage
+              cityItems={content.cities}
+              gameItems={content.games}
+              movieItems={content.movies}
+              onAddListItem={handleAddSectionItem}
+              onDeleteListItem={handleDeleteSectionItem}
+              onUpdateListItem={handleUpdateSectionItem}
+              placeItems={content.places}
+              venueItems={content.venues}
+            />
           )}
-          {activeTab === 'profile' && <ProfilePage />}
+          {activeTab === 'moments' && (
+            <MomentsPage
+              items={content.moments}
+              onAddTimelineItem={(item) => handleAddSectionItem('moments', item)}
+              onDeleteTimelineItem={(id) => handleDeleteSectionItem('moments', id)}
+              onOpenImage={setSelectedTimelineImage}
+              onUpdateTimelineItem={(id, updates) => handleUpdateSectionItem('moments', id, updates)}
+            />
+          )}
+          {activeTab === 'profile' && (
+            <ProfilePage
+              favorites={content.favorites}
+              futureItems={content.futureItems}
+              importantDetails={content.importantDetails}
+              onAddSectionItem={handleAddSectionItem}
+              onDeleteSectionItem={handleDeleteSectionItem}
+              onUpdateSectionItem={handleUpdateSectionItem}
+              sensitiveItems={content.sensitiveItems}
+              wishItems={content.wishItems}
+            />
+          )}
           {activeTab === 'lovelab' && (
             <LoveLabPage
-              dreams={dreams}
-              toggleDream={toggleDream}
+              coupons={content.coupons}
+              dreams={content.dreams}
               handleCouponUse={handleCouponUse}
+              onAddSectionItem={handleAddSectionItem}
+              onDeleteSectionItem={handleDeleteSectionItem}
+              onUpdateSectionItem={handleUpdateSectionItem}
+              songs={content.songs}
+              toggleDream={toggleDream}
               usedCoupons={usedCoupons}
             />
           )}
@@ -278,7 +372,17 @@ function App() {
   )
 }
 
-function HomePage({ birthdayCountdown, noteOfDay, reasonOfDay, togetherDays }) {
+function HomePage({
+  noteOfDay,
+  onAddSectionItem,
+  onDeleteSectionItem,
+  onUpdateSectionItem,
+  reasonOfDay,
+  specialDays,
+  togetherDays,
+}) {
+  const [specialDayModal, setSpecialDayModal] = useState(null)
+
   return (
     <div className="page space-y-8 pb-12">
       <section className="hero glass-card">
@@ -311,20 +415,51 @@ function HomePage({ birthdayCountdown, noteOfDay, reasonOfDay, togetherDays }) {
       <section className="glass-card upcoming-card">
         <div className="section-title-row">
           <h2>Yaklaşan Özel Günler</h2>
+          <button
+            className="add-icon-button"
+            onClick={() => setSpecialDayModal({ mode: 'add' })}
+            type="button"
+          >
+            <PlusIcon />
+          </button>
         </div>
-        <article className="upcoming-item">
-          <div className="upcoming-icon-wrap">
-            <GiftIcon />
-          </div>
-          <div className="upcoming-copy">
-            <span className="fact-label">Doğum Günü</span>
-            <strong>11 Aralık</strong>
-          </div>
-          <div className="upcoming-days">
-            <strong>{birthdayCountdown}</strong>
-            <span>gün kaldı</span>
-          </div>
-        </article>
+        <div className="special-days-list">
+          {specialDays.map((item) => {
+            const status = getSpecialDayStatus(item)
+            return (
+              <article className="upcoming-item editable-card" key={item.id}>
+                <div className="card-action-group vertical top-right">
+                  <button
+                    className="card-edit-button"
+                    onClick={() => setSpecialDayModal({ item, mode: 'edit' })}
+                    type="button"
+                  >
+                    <EditIcon />
+                  </button>
+                  <button
+                    className="card-delete-button"
+                    onClick={() => onDeleteSectionItem('specialDays', item.id)}
+                    type="button"
+                  >
+                    <TrashIcon />
+                  </button>
+                </div>
+                <div className="upcoming-icon-wrap">
+                  <span>{item.icon || <GiftIcon />}</span>
+                </div>
+                <div className="upcoming-copy">
+                  <span className="fact-label">{item.recurring === 'yearly' ? 'Her Yıl' : 'Tek Seferlik'}</span>
+                  <strong>{item.label}</strong>
+                  <p className="upcoming-date-label">{formatDateLabel(item.date)}</p>
+                </div>
+                <div className="upcoming-days">
+                  <strong>{status.value}</strong>
+                  <span>{status.label}</span>
+                </div>
+              </article>
+            )
+          })}
+        </div>
       </section>
 
       <section className="glass-card note-card-wide">
@@ -346,11 +481,42 @@ function HomePage({ birthdayCountdown, noteOfDay, reasonOfDay, togetherDays }) {
         </div>
         <p>{reasonOfDay}</p>
       </section>
+
+      {specialDayModal && (
+        <FormModal
+          title={specialDayModal.mode === 'edit' ? 'Özel Günü Düzenle' : 'Özel Gün Ekle'}
+          onClose={() => setSpecialDayModal(null)}
+        >
+          <AddSpecialDayForm
+            initialValues={specialDayModal.item}
+            onSubmit={(item) => {
+              if (specialDayModal.mode === 'edit') {
+                onUpdateSectionItem('specialDays', specialDayModal.item.id, item)
+              } else {
+                onAddSectionItem('specialDays', item)
+              }
+              setSpecialDayModal(null)
+            }}
+            submitLabel={specialDayModal.mode === 'edit' ? 'Kaydet' : 'Ekle'}
+          />
+        </FormModal>
+      )}
     </div>
   )
 }
 
-function TimelinePage() {
+function TimelinePage({
+  cityItems,
+  gameItems,
+  movieItems,
+  onAddListItem,
+  onDeleteListItem,
+  onUpdateListItem,
+  placeItems,
+  venueItems,
+}) {
+  const [activeListModal, setActiveListModal] = useState(null)
+
   return (
     <div className="page space-y-10 pb-10">
       <div className="page-head">
@@ -358,17 +524,79 @@ function TimelinePage() {
         <p>Birlikte yazdığımız hikayenin sayfaları...</p>
       </div>
 
-      <MiniGrid title="Gittiğimiz Şehirler" items={cityItems} />
-      <MiniGrid title="Gittiğimiz Mekanlar" items={venueItems} />
-      <MiniGrid title="Gittiğimiz Yerler" items={placeItems} />
-      <MiniGrid title="İzlediğimiz Filmler" items={movieItems} />
-      <MiniGrid title="Oynadığımız Oyunlar" items={gameItems} />
+      <EditableMiniGrid
+        items={cityItems}
+        onDelete={(id) => onDeleteListItem('cities', id)}
+        onEdit={(item) => setActiveListModal({ item, mode: 'edit', sectionKey: 'cities' })}
+        onOpenAdd={() => setActiveListModal({ mode: 'add', sectionKey: 'cities' })}
+        title="Gittiğimiz Şehirler"
+      />
+      <EditableMiniGrid
+        items={venueItems}
+        onDelete={(id) => onDeleteListItem('venues', id)}
+        onEdit={(item) => setActiveListModal({ item, mode: 'edit', sectionKey: 'venues' })}
+        onOpenAdd={() => setActiveListModal({ mode: 'add', sectionKey: 'venues' })}
+        title="Gittiğimiz Mekanlar"
+      />
+      <EditableMiniGrid
+        items={placeItems}
+        onDelete={(id) => onDeleteListItem('places', id)}
+        onEdit={(item) => setActiveListModal({ item, mode: 'edit', sectionKey: 'places' })}
+        onOpenAdd={() => setActiveListModal({ mode: 'add', sectionKey: 'places' })}
+        title="Gittiğimiz Yerler"
+      />
+      <EditableMiniGrid
+        items={movieItems}
+        onDelete={(id) => onDeleteListItem('movies', id)}
+        onEdit={(item) => setActiveListModal({ item, mode: 'edit', sectionKey: 'movies' })}
+        onOpenAdd={() => setActiveListModal({ mode: 'add', sectionKey: 'movies' })}
+        title="İzlediğimiz Filmler"
+      />
+      <EditableMiniGrid
+        items={gameItems}
+        onDelete={(id) => onDeleteListItem('games', id)}
+        onEdit={(item) => setActiveListModal({ item, mode: 'edit', sectionKey: 'games' })}
+        onOpenAdd={() => setActiveListModal({ mode: 'add', sectionKey: 'games' })}
+        title="Oynadığımız Oyunlar"
+      />
 
+      {activeListModal && (
+        <FormModal
+          title={
+            activeListModal.mode === 'edit'
+              ? `${getAddModalTitle(activeListModal.sectionKey)} Düzenle`
+              : getAddModalTitle(activeListModal.sectionKey)
+          }
+          onClose={() => setActiveListModal(null)}
+        >
+          <AddMiniItemForm
+            defaults={getMiniDefaults(activeListModal.sectionKey)}
+            initialValues={activeListModal.item}
+            onSubmit={(item) => {
+              if (activeListModal.mode === 'edit') {
+                onUpdateListItem(activeListModal.sectionKey, activeListModal.item.id, item)
+              } else {
+                onAddListItem(activeListModal.sectionKey, item)
+              }
+              setActiveListModal(null)
+            }}
+            submitLabel={activeListModal.mode === 'edit' ? 'Kaydet' : 'Ekle'}
+          />
+        </FormModal>
+      )}
     </div>
   )
 }
 
-function MomentsPage({ onOpenImage }) {
+function MomentsPage({
+  items,
+  onAddTimelineItem,
+  onDeleteTimelineItem,
+  onOpenImage,
+  onUpdateTimelineItem,
+}) {
+  const [timelineModal, setTimelineModal] = useState(null)
+
   return (
     <div className="page space-y-10 pb-10">
       <div className="page-head">
@@ -376,9 +604,36 @@ function MomentsPage({ onOpenImage }) {
         <p>Birlikte en güzel duran anların ayrı sayfası...</p>
       </div>
 
+      <div className="section-title-row">
+        <h2>Zaman Tüneli Kartları</h2>
+        <button
+          className="add-icon-button"
+          onClick={() => setTimelineModal({ mode: 'add' })}
+          type="button"
+        >
+          <PlusIcon />
+        </button>
+      </div>
+
       <div className="timeline-list">
-        {timelineItems.map((item) => (
-          <article key={item.title} className="timeline-card glass-card">
+        {items.map((item) => (
+          <article key={item.id} className="timeline-card glass-card editable-card">
+            <div className="card-action-group top-right">
+              <button
+                className="card-edit-button dark"
+                onClick={() => setTimelineModal({ item, mode: 'edit' })}
+                type="button"
+              >
+                <EditIcon />
+              </button>
+              <button
+                className="card-delete-button dark"
+                onClick={() => onDeleteTimelineItem(item.id)}
+                type="button"
+              >
+                <TrashIcon />
+              </button>
+            </div>
             <button
               className="timeline-image-wrap timeline-image-button"
               onClick={() => onOpenImage({ alt: item.title, src: item.image })}
@@ -394,11 +649,42 @@ function MomentsPage({ onOpenImage }) {
           </article>
         ))}
       </div>
+
+      {timelineModal && (
+        <FormModal
+          title={timelineModal.mode === 'edit' ? 'Zaman Tünelini Düzenle' : 'Zaman Tüneline Ekle'}
+          onClose={() => setTimelineModal(null)}
+        >
+          <AddTimelineItemForm
+            initialValues={timelineModal.item}
+            onSubmit={(item) => {
+              if (timelineModal.mode === 'edit') {
+                onUpdateTimelineItem(timelineModal.item.id, item)
+              } else {
+                onAddTimelineItem(item)
+              }
+              setTimelineModal(null)
+            }}
+            submitLabel={timelineModal.mode === 'edit' ? 'Kaydet' : 'Zaman Tüneline Ekle'}
+          />
+        </FormModal>
+      )}
     </div>
   )
 }
 
-function ProfilePage() {
+function ProfilePage({
+  favorites,
+  futureItems,
+  importantDetails,
+  onAddSectionItem,
+  onDeleteSectionItem,
+  onUpdateSectionItem,
+  sensitiveItems,
+  wishItems,
+}) {
+  const [activeDetailModal, setActiveDetailModal] = useState(null)
+
   return (
     <div className="page space-y-8 pb-10">
       <div className="page-head">
@@ -416,80 +702,102 @@ function ProfilePage() {
         </div>
       </section>
 
-      <section className="space-y-4">
-        <h3>Önemli Detaylar</h3>
-        <div className="detail-grid">
-          {importantDetails.map((item) => (
-            <article key={item.label} className="glass detail-box">
-              <span className="detail-emoji">{item.icon}</span>
-              <span className="detail-label">{item.label}</span>
-              <strong>{item.value}</strong>
-            </article>
-          ))}
-        </div>
-      </section>
+      <EditableInfoSection
+        items={importantDetails}
+        onDelete={(id) => onDeleteSectionItem('importantDetails', id)}
+        onEdit={(item) =>
+          setActiveDetailModal({ item, mode: 'edit', sectionKey: 'importantDetails' })
+        }
+        onOpenAdd={() => setActiveDetailModal({ mode: 'add', sectionKey: 'importantDetails' })}
+        title="Önemli Detaylar"
+        variant="detail"
+      />
 
-      <section className="space-y-4">
-        <h3>Favorileri</h3>
-        <div className="favorites-list">
-          {favorites.map((item) => (
-            <article key={item.label} className="glass favorite-row">
-              <div className="favorite-icon">{item.icon}</div>
-              <div>
-                <span className="detail-label">{item.label}</span>
-                <strong>{item.value}</strong>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
+      <EditableInfoSection
+        items={favorites}
+        onDelete={(id) => onDeleteSectionItem('favorites', id)}
+        onEdit={(item) => setActiveDetailModal({ item, mode: 'edit', sectionKey: 'favorites' })}
+        onOpenAdd={() => setActiveDetailModal({ mode: 'add', sectionKey: 'favorites' })}
+        title="Favorileri"
+        variant="favorite"
+      />
 
-      <section className="space-y-4">
-        <h3>Sevmediği Şeyler</h3>
-        <div className="detail-grid small">
-          {sensitiveItems.map((item) => (
-            <article key={item.label} className="glass detail-box">
-              <span className="detail-emoji">{item.icon}</span>
-              <span className="detail-label">{item.label}</span>
-              <strong>{item.value}</strong>
-            </article>
-          ))}
-        </div>
-      </section>
+      <EditableInfoSection
+        items={sensitiveItems}
+        onDelete={(id) => onDeleteSectionItem('sensitiveItems', id)}
+        onEdit={(item) =>
+          setActiveDetailModal({ item, mode: 'edit', sectionKey: 'sensitiveItems' })
+        }
+        onOpenAdd={() => setActiveDetailModal({ mode: 'add', sectionKey: 'sensitiveItems' })}
+        title="Sevmediği Şeyler"
+        variant="detail"
+      />
 
-      <section className="space-y-4">
-        <h3>Çok İstiyor</h3>
-        <article className="glass-card wish-card">
-          <span className="wish-icon">{biggestWish.icon}</span>
-          <div>
-            <span className="detail-label">{biggestWish.label}</span>
-            <strong>{biggestWish.value}</strong>
-          </div>
-        </article>
-      </section>
+      <EditableInfoSection
+        items={wishItems}
+        onDelete={(id) => onDeleteSectionItem('wishItems', id)}
+        onEdit={(item) => setActiveDetailModal({ item, mode: 'edit', sectionKey: 'wishItems' })}
+        onOpenAdd={() => setActiveDetailModal({ mode: 'add', sectionKey: 'wishItems' })}
+        title="Çok İstiyor"
+        variant="wish"
+      />
 
-      <section className="space-y-4">
-        <h3>Gelecek Hayallerimiz</h3>
-        <div className="future-grid">
-          {futureItems.map((item) => (
-            <article key={item.label} className="glass-card future-card">
-              <span className="future-icon">{item.icon}</span>
-              <span className="detail-label">{item.label}</span>
-              <strong>{item.value}</strong>
-            </article>
-          ))}
-        </div>
-      </section>
+      <EditableInfoSection
+        items={futureItems}
+        onDelete={(id) => onDeleteSectionItem('futureItems', id)}
+        onEdit={(item) =>
+          setActiveDetailModal({ item, mode: 'edit', sectionKey: 'futureItems' })
+        }
+        onOpenAdd={() => setActiveDetailModal({ mode: 'add', sectionKey: 'futureItems' })}
+        title="Gelecek Hayallerimiz"
+        variant="future"
+      />
+
+      {activeDetailModal && (
+        <FormModal
+          title={
+            activeDetailModal.mode === 'edit'
+              ? `${getAddModalTitle(activeDetailModal.sectionKey)} Düzenle`
+              : getAddModalTitle(activeDetailModal.sectionKey)
+          }
+          onClose={() => setActiveDetailModal(null)}
+        >
+          <AddDetailItemForm
+            defaults={getDetailDefaults(activeDetailModal.sectionKey)}
+            initialValues={activeDetailModal.item}
+            onSubmit={(item) => {
+              if (activeDetailModal.mode === 'edit') {
+                onUpdateSectionItem(
+                  activeDetailModal.sectionKey,
+                  activeDetailModal.item.id,
+                  item,
+                )
+              } else {
+                onAddSectionItem(activeDetailModal.sectionKey, item)
+              }
+              setActiveDetailModal(null)
+            }}
+            submitLabel={activeDetailModal.mode === 'edit' ? 'Kaydet' : 'Ekle'}
+          />
+        </FormModal>
+      )}
     </div>
   )
 }
 
 function LoveLabPage({
+  coupons,
   dreams,
-  toggleDream,
   handleCouponUse,
+  onAddSectionItem,
+  onDeleteSectionItem,
+  onUpdateSectionItem,
+  songs,
+  toggleDream,
   usedCoupons,
 }) {
+  const [activeLabModal, setActiveLabModal] = useState(null)
+
   return (
     <div className="page space-y-8 pb-10">
       <div className="page-head">
@@ -500,68 +808,214 @@ function LoveLabPage({
       <section className="space-y-4">
         <div className="section-title-row">
           <h3>Aşk Kuponları</h3>
-          <span>
-            {usedCoupons.length}/{coupons.length} Kullanıldı
-          </span>
+          <div className="section-actions">
+            <span>
+              {usedCoupons.filter((id) => coupons.some((coupon) => coupon.id === id)).length}/
+              {coupons.length} Kullanıldı
+            </span>
+            <button
+              className="add-icon-button"
+              onClick={() => setActiveLabModal({ mode: 'add', sectionKey: 'coupons' })}
+              type="button"
+            >
+              <PlusIcon />
+            </button>
+          </div>
         </div>
         <div className="coupon-grid">
           {coupons.map((coupon) => {
             const used = usedCoupons.includes(coupon.id)
             return (
-              <button
-                key={coupon.id}
-                className={`coupon-card ${coupon.color} ${used ? 'used' : ''}`}
-                disabled={used}
-                onClick={() => handleCouponUse(coupon.id)}
-                type="button"
-              >
-                <span className="coupon-icon">{coupon.icon}</span>
-                <div>
-                  <strong>{coupon.title}</strong>
-                  <span>{used ? 'Kullanıldı' : 'Hemen Kullan'}</span>
+              <article key={coupon.id} className={`coupon-card ${coupon.color} editable-card`}>
+                <div className="card-action-group top-right">
+                  <button
+                    className="card-edit-button dark"
+                    onClick={() => setActiveLabModal({ item: coupon, mode: 'edit', sectionKey: 'coupons' })}
+                    type="button"
+                  >
+                    <EditIcon />
+                  </button>
+                  <button
+                    className="card-delete-button dark"
+                    onClick={() => onDeleteSectionItem('coupons', coupon.id)}
+                    type="button"
+                  >
+                    <TrashIcon />
+                  </button>
                 </div>
-              </button>
+                <button
+                  className={used ? 'coupon-action used' : 'coupon-action'}
+                  disabled={used}
+                  onClick={() => handleCouponUse(coupon.id)}
+                  type="button"
+                >
+                  <span className="coupon-icon">{coupon.icon}</span>
+                  <div>
+                    <strong>{coupon.title}</strong>
+                    <span>{used ? 'Kullanıldı' : 'Hemen Kullan'}</span>
+                  </div>
+                </button>
+              </article>
             )
           })}
         </div>
       </section>
 
       <section className="space-y-4">
-        <h3>Ortak Hayal Listesi</h3>
+        <div className="section-title-row">
+          <h3>Ortak Hayal Listesi</h3>
+          <button
+            className="add-icon-button"
+            onClick={() => setActiveLabModal({ mode: 'add', sectionKey: 'dreams' })}
+            type="button"
+          >
+            <PlusIcon />
+          </button>
+        </div>
         <div className="glass-card checklist">
           {dreams.map((dream) => (
-            <button
-              key={dream.id}
-              className={dream.completed ? 'check-row done' : 'check-row'}
-              onClick={() => toggleDream(dream.id)}
-              type="button"
-            >
-              <span>{dream.completed ? '✓' : '○'}</span>
-              <span>{dream.title}</span>
-            </button>
+            <div key={dream.id} className={dream.completed ? 'check-row done' : 'check-row'}>
+              <button className="check-toggle" onClick={() => toggleDream(dream.id)} type="button">
+                <span>{dream.completed ? '✓' : '○'}</span>
+                <span>{dream.title}</span>
+              </button>
+              <button
+                className="row-edit-button"
+                onClick={() => setActiveLabModal({ item: dream, mode: 'edit', sectionKey: 'dreams' })}
+                type="button"
+              >
+                <EditIcon />
+              </button>
+              <button
+                className="row-delete-button"
+                onClick={() => onDeleteSectionItem('dreams', dream.id)}
+                type="button"
+              >
+                <TrashIcon />
+              </button>
+            </div>
           ))}
         </div>
       </section>
 
-      <section className="glass-card song-card">
-        <div className="song-icon">♫</div>
-        <div>
-          <span className="song-label">Bizim Şarkımız</span>
-          <strong>American Pie</strong>
-          <p>Bir de ekstra duygulandıran şarkı: Arkadaşım Eşek</p>
+      <section className="space-y-4">
+        <div className="section-title-row">
+          <h3>Şarkılarımız</h3>
+          <button
+            className="add-icon-button"
+            onClick={() => setActiveLabModal({ mode: 'add', sectionKey: 'songs' })}
+            type="button"
+          >
+            <PlusIcon />
+          </button>
+        </div>
+        <div className="space-y-4">
+          {songs.map((song) => (
+            <section key={song.id} className="glass-card song-card editable-card">
+              <div className="card-action-group top-right">
+                <button
+                  className="card-edit-button dark"
+                  onClick={() => setActiveLabModal({ item: song, mode: 'edit', sectionKey: 'songs' })}
+                  type="button"
+                >
+                  <EditIcon />
+                </button>
+                <button
+                  className="card-delete-button dark"
+                  onClick={() => onDeleteSectionItem('songs', song.id)}
+                  type="button"
+                >
+                  <TrashIcon />
+                </button>
+              </div>
+              <div className="song-icon">{song.icon}</div>
+              <div>
+                <span className="song-label">{song.label}</span>
+                <strong>{song.value}</strong>
+                <p>{song.description}</p>
+              </div>
+            </section>
+          ))}
         </div>
       </section>
+
+      {activeLabModal && (
+        <FormModal
+          title={
+            activeLabModal.mode === 'edit'
+              ? `${getAddModalTitle(activeLabModal.sectionKey)} Düzenle`
+              : getAddModalTitle(activeLabModal.sectionKey)
+          }
+          onClose={() => setActiveLabModal(null)}
+        >
+          {activeLabModal.sectionKey === 'coupons' && (
+            <AddCouponForm
+              initialValues={activeLabModal.item}
+              onSubmit={(item) => {
+                if (activeLabModal.mode === 'edit') {
+                  onUpdateSectionItem('coupons', activeLabModal.item.id, item)
+                } else {
+                  onAddSectionItem('coupons', item)
+                }
+                setActiveLabModal(null)
+              }}
+              submitLabel={activeLabModal.mode === 'edit' ? 'Kaydet' : 'Kuponu Ekle'}
+            />
+          )}
+          {activeLabModal.sectionKey === 'dreams' && (
+            <AddDreamForm
+              initialValues={activeLabModal.item}
+              onSubmit={(item) => {
+                if (activeLabModal.mode === 'edit') {
+                  onUpdateSectionItem('dreams', activeLabModal.item.id, item)
+                } else {
+                  onAddSectionItem('dreams', item)
+                }
+                setActiveLabModal(null)
+              }}
+              submitLabel={activeLabModal.mode === 'edit' ? 'Kaydet' : 'Hayali Ekle'}
+            />
+          )}
+          {activeLabModal.sectionKey === 'songs' && (
+            <AddSongForm
+              initialValues={activeLabModal.item}
+              onSubmit={(item) => {
+                if (activeLabModal.mode === 'edit') {
+                  onUpdateSectionItem('songs', activeLabModal.item.id, item)
+                } else {
+                  onAddSectionItem('songs', item)
+                }
+                setActiveLabModal(null)
+              }}
+              submitLabel={activeLabModal.mode === 'edit' ? 'Kaydet' : 'Ekle'}
+            />
+          )}
+        </FormModal>
+      )}
     </div>
   )
 }
 
-function MiniGrid({ title, items }) {
+function EditableMiniGrid({ items, onDelete, onEdit, onOpenAdd, title }) {
   return (
     <section className="space-y-4">
-      <h2>{title}</h2>
+      <div className="section-title-row">
+        <h2>{title}</h2>
+        <button className="add-icon-button" onClick={onOpenAdd} type="button">
+          <PlusIcon />
+        </button>
+      </div>
       <div className="mini-grid">
         {items.map((item) => (
-          <article key={item.name} className="glass-card mini-card">
+          <article key={item.id} className="glass-card mini-card editable-card">
+            <div className="card-action-group vertical">
+              <button className="card-edit-button" onClick={() => onEdit(item)} type="button">
+                <EditIcon />
+              </button>
+              <button className="card-delete-button" onClick={() => onDelete(item.id)} type="button">
+                <TrashIcon />
+              </button>
+            </div>
             <span className="mini-icon">{item.icon}</span>
             <div>
               <h4>{item.name}</h4>
@@ -574,15 +1028,841 @@ function MiniGrid({ title, items }) {
   )
 }
 
-function daysUntilBirthday(monthIndex, day) {
-  const now = new Date()
-  const year = now.getFullYear()
-  const nextBirthday = new Date(year, monthIndex, day)
-  if (nextBirthday < new Date(year, now.getMonth(), now.getDate())) {
-    nextBirthday.setFullYear(year + 1)
+function EditableInfoSection({ items, onDelete, onEdit, onOpenAdd, title, variant }) {
+  const gridClass =
+    variant === 'favorite'
+      ? 'favorites-list'
+      : variant === 'future'
+        ? 'future-grid'
+        : variant === 'wish'
+          ? 'space-y-4'
+          : 'detail-grid'
+
+  return (
+    <section className="space-y-4">
+      <div className="section-title-row">
+        <h3>{title}</h3>
+        <button className="add-icon-button" onClick={onOpenAdd} type="button">
+          <PlusIcon />
+        </button>
+      </div>
+      <div className={gridClass}>
+        {items.map((item) => (
+          <InfoCard
+            item={item}
+            key={item.id}
+            onDelete={() => onDelete(item.id)}
+            onEdit={() => onEdit(item)}
+            variant={variant}
+          />
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function InfoCard({ item, onDelete, onEdit, variant }) {
+  if (variant === 'favorite') {
+    return (
+      <article className="glass favorite-row editable-card">
+        <div className="card-action-group vertical">
+          <button className="card-edit-button" onClick={onEdit} type="button">
+            <EditIcon />
+          </button>
+          <button className="card-delete-button" onClick={onDelete} type="button">
+            <TrashIcon />
+          </button>
+        </div>
+        <div className="favorite-icon">{item.icon}</div>
+        <div>
+          <span className="detail-label">{item.label}</span>
+          <strong>{item.value}</strong>
+        </div>
+      </article>
+    )
   }
-  const diff = nextBirthday.getTime() - now.getTime()
-  return Math.ceil(diff / (1000 * 60 * 60 * 24))
+
+  if (variant === 'future') {
+    return (
+      <article className="glass-card future-card editable-card">
+        <div className="card-action-group vertical">
+          <button className="card-edit-button" onClick={onEdit} type="button">
+            <EditIcon />
+          </button>
+          <button className="card-delete-button" onClick={onDelete} type="button">
+            <TrashIcon />
+          </button>
+        </div>
+        <span className="future-icon">{item.icon}</span>
+        <span className="detail-label">{item.label}</span>
+        <strong>{item.value}</strong>
+      </article>
+    )
+  }
+
+  if (variant === 'wish') {
+    return (
+      <article className="glass-card wish-card editable-card">
+        <div className="card-action-group vertical">
+          <button className="card-edit-button" onClick={onEdit} type="button">
+            <EditIcon />
+          </button>
+          <button className="card-delete-button" onClick={onDelete} type="button">
+            <TrashIcon />
+          </button>
+        </div>
+        <span className="wish-icon">{item.icon}</span>
+        <div>
+          <span className="detail-label">{item.label}</span>
+          <strong>{item.value}</strong>
+        </div>
+      </article>
+    )
+  }
+
+  return (
+    <article className="glass detail-box editable-card">
+      <div className="card-action-group vertical">
+        <button className="card-edit-button" onClick={onEdit} type="button">
+          <EditIcon />
+        </button>
+        <button className="card-delete-button" onClick={onDelete} type="button">
+          <TrashIcon />
+        </button>
+      </div>
+      <span className="detail-emoji">{item.icon}</span>
+      <span className="detail-label">{item.label}</span>
+      <strong>{item.value}</strong>
+    </article>
+  )
+}
+
+function AddMiniItemForm({ defaults, initialValues, onSubmit, submitLabel = 'Ekle' }) {
+  const [name, setName] = useState(initialValues?.name ?? '')
+  const [meta, setMeta] = useState(initialValues?.meta ?? '')
+  const [icon, setIcon] = useState(initialValues?.icon ?? defaults.icon)
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+
+    if (!name.trim() || !meta.trim()) {
+      return
+    }
+
+    onSubmit({
+      icon: icon.trim() || defaults.icon,
+      meta: meta.trim(),
+      name: name.trim(),
+    })
+  }
+
+  return (
+    <form className="add-form" onSubmit={handleSubmit}>
+      <div className="form-grid compact">
+        <label className="form-field">
+          <span>Başlık</span>
+          <input
+            onChange={(event) => setName(event.target.value)}
+            placeholder={defaults.namePlaceholder}
+            type="text"
+            value={name}
+          />
+        </label>
+        <label className="form-field">
+          <span>Alt Bilgi</span>
+          <input
+            onChange={(event) => setMeta(event.target.value)}
+            placeholder={defaults.metaPlaceholder}
+            type="text"
+            value={meta}
+          />
+        </label>
+      </div>
+      <div className="form-actions">
+        <label className="form-field icon-field">
+          <span>İkon</span>
+          <input
+            maxLength={4}
+            onChange={(event) => setIcon(event.target.value)}
+            placeholder={defaults.icon}
+            type="text"
+            value={icon}
+          />
+        </label>
+        <button className="add-submit" type="submit">
+          {submitLabel}
+        </button>
+      </div>
+    </form>
+  )
+}
+
+function AddDetailItemForm({ defaults, initialValues, onSubmit, submitLabel = 'Ekle' }) {
+  const [label, setLabel] = useState(initialValues?.label ?? '')
+  const [value, setValue] = useState(initialValues?.value ?? '')
+  const [icon, setIcon] = useState(initialValues?.icon ?? defaults.icon)
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+
+    if (!label.trim() || !value.trim()) {
+      return
+    }
+
+    onSubmit({
+      icon: icon.trim() || defaults.icon,
+      label: label.trim(),
+      value: value.trim(),
+    })
+  }
+
+  return (
+    <form className="add-form" onSubmit={handleSubmit}>
+      <div className="form-grid compact">
+        <label className="form-field">
+          <span>Başlık</span>
+          <input
+            onChange={(event) => setLabel(event.target.value)}
+            placeholder={defaults.labelPlaceholder}
+            type="text"
+            value={label}
+          />
+        </label>
+        <label className="form-field">
+          <span>İçerik</span>
+          <input
+            onChange={(event) => setValue(event.target.value)}
+            placeholder={defaults.valuePlaceholder}
+            type="text"
+            value={value}
+          />
+        </label>
+      </div>
+      <div className="form-actions">
+        <label className="form-field icon-field">
+          <span>İkon</span>
+          <input
+            maxLength={4}
+            onChange={(event) => setIcon(event.target.value)}
+            placeholder={defaults.icon}
+            type="text"
+            value={icon}
+          />
+        </label>
+        <button className="add-submit" type="submit">
+          {submitLabel}
+        </button>
+      </div>
+    </form>
+  )
+}
+
+function AddTimelineItemForm({ initialValues, onSubmit, submitLabel = 'Zaman Tüneline Ekle' }) {
+  const [title, setTitle] = useState(initialValues?.title ?? '')
+  const [category, setCategory] = useState(initialValues?.category ?? '')
+  const [description, setDescription] = useState(initialValues?.description ?? '')
+  const [image, setImage] = useState(initialValues?.image ?? '')
+
+  const handleFileChange = (event) => {
+    const file = event.target.files?.[0]
+    if (!file) {
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        setImage(reader.result)
+      }
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+
+    if (!title.trim() || !category.trim() || !description.trim() || !image) {
+      return
+    }
+
+    onSubmit({
+      category: category.trim(),
+      description: description.trim(),
+      image,
+      title: title.trim(),
+    })
+  }
+
+  return (
+    <form className="add-form" onSubmit={handleSubmit}>
+      <div className="form-grid">
+        <label className="form-field">
+          <span>Başlık</span>
+          <input
+            onChange={(event) => setTitle(event.target.value)}
+            placeholder="Yeni anı başlığı"
+            type="text"
+            value={title}
+          />
+        </label>
+        <label className="form-field">
+          <span>Kategori</span>
+          <input
+            onChange={(event) => setCategory(event.target.value)}
+            placeholder="Özel Gün"
+            type="text"
+            value={category}
+          />
+        </label>
+      </div>
+      <label className="form-field">
+        <span>Açıklama</span>
+        <textarea
+          onChange={(event) => setDescription(event.target.value)}
+          placeholder="Bu anı kısa şekilde anlat"
+          rows="3"
+          value={description}
+        />
+      </label>
+      <label className="form-field">
+        <span>Fotoğraf</span>
+        <input accept="image/*" onChange={handleFileChange} type="file" />
+      </label>
+      <button className="add-submit full" type="submit">
+        {submitLabel}
+      </button>
+    </form>
+  )
+}
+
+function AddCouponForm({ initialValues, onSubmit, submitLabel = 'Kuponu Ekle' }) {
+  const [title, setTitle] = useState(initialValues?.title ?? '')
+  const [icon, setIcon] = useState(initialValues?.icon ?? '🎁')
+  const [color, setColor] = useState(initialValues?.color ?? 'rose')
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+
+    if (!title.trim()) {
+      return
+    }
+
+    onSubmit({
+      color,
+      icon: icon.trim() || '🎁',
+      title: title.trim(),
+    })
+  }
+
+  return (
+    <form className="add-form" onSubmit={handleSubmit}>
+      <label className="form-field">
+        <span>Kupon Başlığı</span>
+        <input
+          onChange={(event) => setTitle(event.target.value)}
+          placeholder="Yeni kupon adı"
+          type="text"
+          value={title}
+        />
+      </label>
+      <div className="form-grid compact">
+        <label className="form-field">
+          <span>İkon</span>
+          <input
+            maxLength={4}
+            onChange={(event) => setIcon(event.target.value)}
+            placeholder="🎁"
+            type="text"
+            value={icon}
+          />
+        </label>
+        <label className="form-field">
+          <span>Renk</span>
+          <select onChange={(event) => setColor(event.target.value)} value={color}>
+            <option value="blue">Mavi</option>
+            <option value="rose">Pembe</option>
+            <option value="amber">Turuncu</option>
+            <option value="teal">Yeşil</option>
+          </select>
+        </label>
+      </div>
+      <button className="add-submit full" type="submit">
+        {submitLabel}
+      </button>
+    </form>
+  )
+}
+
+function AddDreamForm({ initialValues, onSubmit, submitLabel = 'Hayali Ekle' }) {
+  const [title, setTitle] = useState(initialValues?.title ?? '')
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+
+    if (!title.trim()) {
+      return
+    }
+
+    onSubmit({
+      completed: initialValues?.completed ?? false,
+      title: title.trim(),
+    })
+  }
+
+  return (
+    <form className="add-form" onSubmit={handleSubmit}>
+      <label className="form-field">
+        <span>Hayal</span>
+        <input
+          onChange={(event) => setTitle(event.target.value)}
+          placeholder="Yeni ortak hayal"
+          type="text"
+          value={title}
+        />
+      </label>
+      <button className="add-submit full" type="submit">
+        {submitLabel}
+      </button>
+    </form>
+  )
+}
+
+function AddSongForm({ initialValues, onSubmit, submitLabel = 'Ekle' }) {
+  const [label, setLabel] = useState(initialValues?.label ?? 'Bizim Şarkımız')
+  const [value, setValue] = useState(initialValues?.value ?? '')
+  const [description, setDescription] = useState(initialValues?.description ?? '')
+  const [icon, setIcon] = useState(initialValues?.icon ?? '♫')
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+
+    if (!label.trim() || !value.trim()) {
+      return
+    }
+
+    onSubmit({
+      description: description.trim(),
+      icon: icon.trim() || '♫',
+      label: label.trim(),
+      value: value.trim(),
+    })
+  }
+
+  return (
+    <form className="add-form" onSubmit={handleSubmit}>
+      <div className="form-grid compact">
+        <label className="form-field">
+          <span>Etiket</span>
+          <input
+            onChange={(event) => setLabel(event.target.value)}
+            placeholder="Bizim Şarkımız"
+            type="text"
+            value={label}
+          />
+        </label>
+        <label className="form-field">
+          <span>Şarkı</span>
+          <input
+            onChange={(event) => setValue(event.target.value)}
+            placeholder="Şarkı adı"
+            type="text"
+            value={value}
+          />
+        </label>
+      </div>
+      <label className="form-field">
+        <span>Açıklama</span>
+        <textarea
+          onChange={(event) => setDescription(event.target.value)}
+          placeholder="İstersen kısa bir not"
+          rows="3"
+          value={description}
+        />
+      </label>
+      <div className="form-actions">
+        <label className="form-field icon-field">
+          <span>İkon</span>
+          <input
+            maxLength={4}
+            onChange={(event) => setIcon(event.target.value)}
+            placeholder="♫"
+            type="text"
+            value={icon}
+          />
+        </label>
+        <button className="add-submit" type="submit">
+          {submitLabel}
+        </button>
+      </div>
+    </form>
+  )
+}
+
+function AddSpecialDayForm({ initialValues, onSubmit, submitLabel = 'Ekle' }) {
+  const [label, setLabel] = useState(initialValues?.label ?? '')
+  const [date, setDate] = useState(initialValues?.date ?? '')
+  const [icon, setIcon] = useState(initialValues?.icon ?? '🎉')
+  const [recurring, setRecurring] = useState(initialValues?.recurring ?? 'once')
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    if (!label.trim() || !date) {
+      return
+    }
+    onSubmit({
+      date,
+      icon: icon.trim() || '🎉',
+      label: label.trim(),
+      recurring,
+    })
+  }
+
+  return (
+    <form className="add-form" onSubmit={handleSubmit}>
+      <div className="form-grid compact">
+        <label className="form-field">
+          <span>Başlık</span>
+          <input onChange={(event) => setLabel(event.target.value)} type="text" value={label} />
+        </label>
+        <label className="form-field">
+          <span>Tarih</span>
+          <input onChange={(event) => setDate(event.target.value)} type="date" value={date} />
+        </label>
+      </div>
+      <div className="form-grid compact">
+        <label className="form-field">
+          <span>İkon</span>
+          <input
+            maxLength={4}
+            onChange={(event) => setIcon(event.target.value)}
+            placeholder="🎉"
+            type="text"
+            value={icon}
+          />
+        </label>
+        <label className="form-field">
+          <span>Tekrar</span>
+          <select onChange={(event) => setRecurring(event.target.value)} value={recurring}>
+            <option value="once">Bir kere</option>
+            <option value="yearly">Her yıl</option>
+          </select>
+        </label>
+      </div>
+      <button className="add-submit full" type="submit">
+        {submitLabel}
+      </button>
+    </form>
+  )
+}
+
+function FormModal({ children, onClose, title }) {
+  return (
+    <div className="form-modal-backdrop" onClick={onClose} role="button" tabIndex={0}>
+      <div className="form-modal" onClick={(event) => event.stopPropagation()}>
+        <div className="form-modal-head">
+          <h3>{title}</h3>
+          <button className="form-modal-close" onClick={onClose} type="button">
+            ×
+          </button>
+        </div>
+        {children}
+      </div>
+    </div>
+  )
+}
+
+function createSeedList(sectionKey, items) {
+  return items.map((item, index) => ({
+    id: `${sectionKey}-seed-${index}`,
+    ...item,
+  }))
+}
+
+function createCustomId(sectionKey) {
+  return `${sectionKey}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+}
+
+function getDefaultContent() {
+  return {
+    cities: cityItemsSeed.map(cloneItem),
+    coupons: couponsSeed.map(cloneItem),
+    dreams: dreamItemsSeed.map(cloneItem),
+    favorites: favoritesSeed.map(cloneItem),
+    futureItems: futureItemsSeed.map(cloneItem),
+    games: gameItemsSeed.map(cloneItem),
+    importantDetails: importantDetailsSeed.map(cloneItem),
+    moments: timelineItemsSeed.map(cloneItem),
+    movies: movieItemsSeed.map(cloneItem),
+    places: placeItemsSeed.map(cloneItem),
+    specialDays: specialDaysSeed.map(cloneItem),
+    sensitiveItems: sensitiveItemsSeed.map(cloneItem),
+    songs: songItemsSeed.map(cloneItem),
+    venues: venueItemsSeed.map(cloneItem),
+    wishItems: wishItemsSeed.map(cloneItem),
+  }
+}
+
+function cloneItem(item) {
+  return { ...item }
+}
+
+function loadEditableContent() {
+  const fallback = getDefaultContent()
+
+  if (typeof window === 'undefined') {
+    return fallback
+  }
+
+  try {
+    const raw = window.localStorage.getItem(CONTENT_STORAGE_KEY)
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      return {
+        cities: normalizeItems(parsed.cities, fallback.cities),
+        coupons: normalizeItems(parsed.coupons, fallback.coupons),
+        dreams: normalizeItems(parsed.dreams, fallback.dreams),
+        favorites: normalizeItems(parsed.favorites, fallback.favorites),
+        futureItems: normalizeItems(parsed.futureItems, fallback.futureItems),
+        games: normalizeItems(parsed.games, fallback.games),
+        importantDetails: normalizeItems(parsed.importantDetails, fallback.importantDetails),
+        moments: normalizeItems(parsed.moments, fallback.moments),
+        movies: normalizeItems(parsed.movies, fallback.movies),
+        places: normalizeItems(parsed.places, fallback.places),
+        specialDays: normalizeItems(parsed.specialDays, fallback.specialDays),
+        sensitiveItems: normalizeItems(parsed.sensitiveItems, fallback.sensitiveItems),
+        songs: normalizeItems(parsed.songs, fallback.songs),
+        venues: normalizeItems(parsed.venues, fallback.venues),
+        wishItems: normalizeItems(parsed.wishItems, fallback.wishItems),
+      }
+    }
+  } catch {
+    return fallback
+  }
+
+  return migrateLegacyContent(fallback)
+}
+
+function persistEditableContent(content) {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  window.localStorage.setItem(CONTENT_STORAGE_KEY, JSON.stringify(content))
+}
+
+function normalizeItems(items, fallbackItems) {
+  if (!Array.isArray(items)) {
+    return fallbackItems.map(cloneItem)
+  }
+
+  return items.map((item, index) => ({
+    ...item,
+    id: item.id ?? `${fallbackItems[0]?.id?.split('-seed-')[0] ?? 'item'}-legacy-${index}`,
+  }))
+}
+
+function migrateLegacyContent(fallback) {
+  const next = getDefaultContent()
+
+  try {
+    const legacyLists = window.localStorage.getItem(LEGACY_CUSTOM_LISTS_STORAGE_KEY)
+    if (legacyLists) {
+      const parsed = JSON.parse(legacyLists)
+      next.cities = [...next.cities, ...appendLegacyItems('cities', parsed.cities)]
+      next.venues = [...next.venues, ...appendLegacyItems('venues', parsed.venues)]
+      next.places = [...next.places, ...appendLegacyItems('places', parsed.places)]
+      next.movies = [...next.movies, ...appendLegacyItems('movies', parsed.movies)]
+      next.games = [...next.games, ...appendLegacyItems('games', parsed.games)]
+    }
+  } catch {
+    return fallback
+  }
+
+  try {
+    const legacyTimeline = window.localStorage.getItem(LEGACY_CUSTOM_TIMELINE_STORAGE_KEY)
+    if (legacyTimeline) {
+      const parsed = JSON.parse(legacyTimeline)
+      next.moments = [...next.moments, ...appendLegacyItems('moments', parsed)]
+    }
+  } catch {
+    return fallback
+  }
+
+  try {
+    const legacyDreams = window.localStorage.getItem(LEGACY_DREAMS_STORAGE_KEY)
+    if (legacyDreams) {
+      const parsed = JSON.parse(legacyDreams)
+      if (Array.isArray(parsed)) {
+        next.dreams = parsed.map((item, index) => ({
+          completed: Boolean(item.completed),
+          id: item.id ?? `dreams-legacy-${index}`,
+          title: item.title ?? '',
+        }))
+      }
+    }
+  } catch {
+    return fallback
+  }
+
+  return next
+}
+
+function appendLegacyItems(sectionKey, items) {
+  if (!Array.isArray(items)) {
+    return []
+  }
+
+  return items.map((item, index) => ({
+    id: `${sectionKey}-legacy-${index}`,
+    ...item,
+  }))
+}
+
+function getMiniDefaults(listKey) {
+  const defaults = {
+    cities: {
+      icon: '🌍',
+      metaPlaceholder: 'İlk buluşma gibi',
+      namePlaceholder: 'Şehir adı',
+    },
+    games: {
+      icon: '🎮',
+      metaPlaceholder: 'Co-op, macera gibi',
+      namePlaceholder: 'Oyun adı',
+    },
+    movies: {
+      icon: '🎬',
+      metaPlaceholder: 'Film veya dizi',
+      namePlaceholder: 'İçerik adı',
+    },
+    places: {
+      icon: '📍',
+      metaPlaceholder: 'Manzara, sahil gibi',
+      namePlaceholder: 'Yer adı',
+    },
+    venues: {
+      icon: '🍽️',
+      metaPlaceholder: 'Kahve, yemek gibi',
+      namePlaceholder: 'Mekan adı',
+    },
+  }
+
+  return defaults[listKey]
+}
+
+function getDetailDefaults(sectionKey) {
+  const defaults = {
+    favorites: {
+      icon: '✨',
+      labelPlaceholder: 'Favori alanı',
+      valuePlaceholder: 'İçerik',
+    },
+    futureItems: {
+      icon: '🌟',
+      labelPlaceholder: 'Hayal başlığı',
+      valuePlaceholder: 'Hayal detayı',
+    },
+    importantDetails: {
+      icon: '💗',
+      labelPlaceholder: 'Bilgi başlığı',
+      valuePlaceholder: 'Bilgi içeriği',
+    },
+    sensitiveItems: {
+      icon: '🫧',
+      labelPlaceholder: 'Başlık',
+      valuePlaceholder: 'Detay',
+    },
+    wishItems: {
+      icon: '💒',
+      labelPlaceholder: 'İstek başlığı',
+      valuePlaceholder: 'İstek içeriği',
+    },
+  }
+
+  return defaults[sectionKey]
+}
+
+function getAddModalTitle(sectionKey) {
+  const titles = {
+    cities: 'Şehre Ekle',
+    coupons: 'Kupon Ekle',
+    dreams: 'Hayal Ekle',
+    favorites: 'Favoriye Ekle',
+    futureItems: 'Hayale Ekle',
+    games: 'Oyuna Ekle',
+    importantDetails: 'Detay Ekle',
+    moments: 'Zaman Tüneline Ekle',
+    movies: 'Filme/Diziye Ekle',
+    places: 'Yere Ekle',
+    sensitiveItems: 'Madde Ekle',
+    songs: 'Şarkı Ekle',
+    venues: 'Mekana Ekle',
+    wishItems: 'İstek Ekle',
+  }
+
+  return titles[sectionKey]
+}
+
+function daysSince(date) {
+  const oneDay = 1000 * 60 * 60 * 24
+  return Math.max(1, Math.floor((Date.now() - date.getTime()) / oneDay))
+}
+
+function getSpecialDayStatus(item) {
+  if (!item?.date) {
+    return { label: '', value: '-' }
+  }
+
+  const today = startOfDay(new Date())
+  const target = startOfDay(new Date(item.date))
+
+  if (item.recurring === 'yearly') {
+    const nextDate = new Date(
+      today.getFullYear(),
+      target.getMonth(),
+      target.getDate(),
+    )
+
+    if (nextDate.getTime() === today.getTime()) {
+      return { label: 'bugün', value: 'Bugün' }
+    }
+
+    if (nextDate < today) {
+      nextDate.setFullYear(today.getFullYear() + 1)
+    }
+
+    const diffDays = Math.round((nextDate.getTime() - today.getTime()) / 86400000)
+    return { label: 'gün kaldı', value: String(diffDays) }
+  }
+
+  const diffDays = Math.round((target.getTime() - today.getTime()) / 86400000)
+
+  if (diffDays === 0) {
+    return { label: 'bugün', value: 'Bugün' }
+  }
+
+  if (diffDays > 0) {
+    return { label: 'gün kaldı', value: String(diffDays) }
+  }
+
+  return { label: 'gün geçti', value: String(Math.abs(diffDays)) }
+}
+
+function formatDateLabel(dateValue) {
+  if (!dateValue) {
+    return ''
+  }
+
+  const date = new Date(dateValue)
+  return date.toLocaleDateString('tr-TR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
+}
+
+function startOfDay(date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
 }
 
 function pickDailyItem(list, offset = 0) {
@@ -635,42 +1915,17 @@ function persistDailyCoupons(usedCoupons) {
   )
 }
 
-function loadDreams() {
-  if (typeof window === 'undefined') {
-    return dreamListSeed
-  }
-
-  try {
-    const raw = window.localStorage.getItem(DREAMS_STORAGE_KEY)
-    if (!raw) {
-      return dreamListSeed
-    }
-
-    const parsed = JSON.parse(raw)
-    if (!Array.isArray(parsed)) {
-      return dreamListSeed
-    }
-
-    return dreamListSeed.map((dream) => {
-      const saved = parsed.find((item) => item.id === dream.id)
-      return saved ? { ...dream, completed: Boolean(saved.completed) } : dream
-    })
-  } catch {
-    return dreamListSeed
-  }
-}
-
-function persistDreams(dreams) {
-  if (typeof window === 'undefined') {
-    return
-  }
-
-  window.localStorage.setItem(DREAMS_STORAGE_KEY, JSON.stringify(dreams))
-}
-
 function BaseIcon({ children }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.9"
+      viewBox="0 0 24 24"
+    >
       {children}
     </svg>
   )
@@ -681,7 +1936,7 @@ function TodayIcon() {
     <BaseIcon>
       <path d="M7 3v3" />
       <path d="M17 3v3" />
-      <rect x="4" y="5" width="16" height="15" rx="3" />
+      <rect height="15" rx="3" width="16" x="4" y="5" />
       <path d="M4 10h16" />
       <path d="m10 15 1.2 1.2L14.5 13" />
     </BaseIcon>
@@ -691,8 +1946,8 @@ function TodayIcon() {
 function GalleryIcon() {
   return (
     <BaseIcon>
-      <rect x="3.5" y="5" width="17" height="14" rx="3" />
-      <circle cx="8" cy="10" r="1.2" fill="currentColor" stroke="none" />
+      <rect height="14" rx="3" width="17" x="3.5" y="5" />
+      <circle cx="8" cy="10" fill="currentColor" r="1.2" stroke="none" />
       <path d="m7 16 3.2-3.2a1 1 0 0 1 1.4 0l2 2 1.4-1.4a1 1 0 0 1 1.4 0L18 15" />
     </BaseIcon>
   )
@@ -728,7 +1983,15 @@ function TimeIcon() {
 
 function RoseIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.8"
+      viewBox="0 0 24 24"
+    >
       <path d="M12 21c0-4.5 1.8-7 5.5-9.5" />
       <path d="M12 21c0-4.5-1.8-7-5.5-9.5" />
       <path d="M12 11c2.6 0 4.5-1.8 4.5-4 0-2-1.4-3.5-3.4-3.5-1 0-1.8.4-2.4 1.2-.6-.8-1.4-1.2-2.4-1.2C6.9 3.5 5.5 5 5.5 7c0 2.2 1.9 4 4.5 4Z" />
@@ -740,7 +2003,7 @@ function RoseIcon() {
 
 function HeartInlineIcon() {
   return (
-    <svg className="heart-inline" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <svg aria-hidden="true" className="heart-inline" fill="currentColor" viewBox="0 0 24 24">
       <path d="M12 21s-6.7-4.35-9.24-8.1C.76 9.94 2.1 5.7 5.95 4.7c2.1-.55 4.2.2 5.32 1.86C12.4 4.9 14.5 4.15 16.6 4.7c3.85 1 5.2 5.24 3.2 8.2C18.7 16.65 12 21 12 21Z" />
     </svg>
   )
@@ -748,13 +2011,51 @@ function HeartInlineIcon() {
 
 function GiftIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.8"
+      viewBox="0 0 24 24"
+    >
       <path d="M20 12v8H4v-8" />
       <path d="M2 7h20v5H2z" />
       <path d="M12 7v13" />
       <path d="M12 7H8.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7Z" />
       <path d="M12 7h3.5a2.5 2.5 0 1 0 0-5C13 2 12 7 12 7Z" />
     </svg>
+  )
+}
+
+function PlusIcon() {
+  return (
+    <BaseIcon>
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </BaseIcon>
+  )
+}
+
+function EditIcon() {
+  return (
+    <BaseIcon>
+      <path d="m4 20 4.5-1 9.3-9.3a1.9 1.9 0 0 0 0-2.7l-.8-.8a1.9 1.9 0 0 0-2.7 0L5 15.5 4 20Z" />
+      <path d="M12.5 7.5 16.5 11.5" />
+    </BaseIcon>
+  )
+}
+
+function TrashIcon() {
+  return (
+    <BaseIcon>
+      <path d="M4 7h16" />
+      <path d="M10 11v6" />
+      <path d="M14 11v6" />
+      <path d="M6.5 7 7.5 19a2 2 0 0 0 2 1.8h5a2 2 0 0 0 2-1.8L17.5 7" />
+      <path d="M9 7V4.8a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1V7" />
+    </BaseIcon>
   )
 }
 
